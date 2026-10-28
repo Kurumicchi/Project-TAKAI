@@ -1,25 +1,16 @@
 import providers.ollama as ollama
-# import providers.gemini as gemini
-# import providers.anthropic as anthropic
 
-# from audio.stt import listen
-# from audio.tts import speak
+from audio.STT import listen
+
+from memory.chat_history import add_message, load_history
 
 PROVIDER = "ollama"
 
-
-def get_reply(user_input):
+def get_reply(history):
     if PROVIDER == "ollama":
-        return ollama.get_reply(user_input)
-    """
-    if PROVIDER == "gemini":
-        return gemini.get_reply(user_input)
+        return ollama.get_reply(history)
 
-    if PROVIDER == "anthropic":
-        return anthropic.get_reply(user_input)
-    """
     raise ValueError(f"Unknown provider: {PROVIDER}")
-
 
 def main():
     print(f"TAKAI is using {PROVIDER}.")
@@ -30,11 +21,18 @@ def main():
         if not user_input:
             continue
 
-        if user_input.lower() == "exit":
+        if user_input.strip().lower() == "dadah":
             print("Goodbye!")
             break
 
-        print("TAKAI:", get_reply(user_input))
+        add_message("user", user_input)
+
+        history = load_history()
+        response = get_reply(history)
+
+        add_message("assistant", response)
+
+        print("TAKAI:", response)
 
 
 if __name__ == "__main__":

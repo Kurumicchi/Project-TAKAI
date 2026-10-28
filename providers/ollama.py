@@ -7,21 +7,21 @@ URL = "http://localhost:11434/api/chat"
 with open("TAKAI_SYSTEM.md", "r", encoding="utf-8") as file:
     SYSTEM_PROMPT = file.read()
 
-def get_reply(user_input):
+def get_reply(history):
+    messages = [
+        {
+            "role": "system",
+            "content": SYSTEM_PROMPT
+        }
+    ]
+
+    messages.extend(history)
+
     response = requests.post(
         URL,
         json={
             "model": MODEL,
-            "messages": [
-                {
-                    "role": "system",
-                    "content": SYSTEM_PROMPT
-                },
-                {
-                    "role": "user",
-                    "content": user_input
-                }
-            ],
+            "messages": messages,
             "stream": False,
             "options": {
                 "temperature": 0.5
