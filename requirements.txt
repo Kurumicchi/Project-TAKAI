@@ -1,0 +1,11 @@
+# TAKAI - pasang dengan:  pip install -r requirements.txt
+
+requests==2.34.2            # providers/ollama.py
+SpeechRecognition==3.17.0   # tukar suara jadi teks
+sounddevice==0.5.6          # rakam mic (ganti PyAudio: tiada wheel Python 3.14)
+keyboard==0.13.5            # butang Q pause/resume
+edge-tts==7.3.1             # suara Indonesia
+
+# pygame-ce, bukan pygame. Sama je `import pygame`, tapi pygame-ce ada wheel
+# untuk Python 3.14. "Voice Visualization" pun guna ni.
+pygame-ce==2.5.8
