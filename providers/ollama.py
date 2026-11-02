@@ -1,7 +1,7 @@
 import requests
 
 
-MODEL = "hf.co/ge525/Qwen3.8-9B-Distill-uncensored-heretic-Q4_K_M-GGUF:Q4_K_M"
+MODEL = "qwen3:8b"
 URL = "http://localhost:11434/api/chat"
 
 with open("TAKAI_SYSTEM.md", "r", encoding="utf-8") as file:
@@ -27,9 +27,15 @@ def get_reply(history):
                 "temperature": 0.5
             }
         },
-        timeout=120
+        timeout=300
     )
 
     response.raise_for_status()
 
-    return response.json()["message"]["content"].strip()
+    content = response.json()["message"]["content"]
+
+    # Buang bahagian "berfikir" model, ambil jawapan selepas </think>
+    if "</think>" in content:
+        content = content.split("</think>")[-1]
+
+    return content.strip()

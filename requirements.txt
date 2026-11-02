@@ -1,0 +1,42 @@
+# TAKAI - core dependencies
+# Pinned to the versions verified working on Python 3.12 - 3.14 (Windows).
+#
+#   pip install -r requirements.txt
+
+# --- LLM transport ---
+requests==2.34.2
+python-dotenv==1.2.4
+
+# --- Speech-to-text ---
+# sounddevice bundles PortAudio, so PyAudio is NOT needed. This matters:
+# PyAudio has no prebuilt wheel for Python 3.14 and requires a C toolchain.
+SpeechRecognition==3.17.0
+sounddevice==0.5.6
+numpy==2.5.4
+
+# Butang Q untuk pause/resume dalam audio/stt.py
+keyboard==0.13.5
+
+# --- Text-to-speech ---
+# edge-tts gives free Indonesian neural voices (id-ID-ArdiNeural /
+# id-ID-GadisNeural) with no API key and no ffmpeg.
+edge-tts==7.3.1
+
+# pygame-ce, not pygame: it is the same `import pygame` module, but it ships
+# wheels for Python 3.14 whereas pygame itself does not. Also what
+# "Voice Visualization" needs.
+pygame-ce==2.5.8
+
+# Pemain audio ganti, kalau pygame buat masalah (lihat backup/).
+playsound3==3.3.2
+
+# Offline fallback voice (Windows SAPI / macOS NSSpeech / espeak).
+pyttsx3==2.99
+
+
+# --- Optional cloud providers -------------------------------------------
+# Only needed if you set TAKAI_PROVIDER to gemini or anthropic.
+# Uncomment the one you want, then re-run pip install -r requirements.txt
+#
+# google-genai==2.31.0
+# anthropic==1.14.0
