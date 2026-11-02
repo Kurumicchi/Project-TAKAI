@@ -6,19 +6,19 @@ import sys
 # --- CONFIGURATION ---
 WIDTH, HEIGHT = 600, 600
 BASE_RADIUS = 130
-COLOR_WAVE = (245, 245, 248)  # Pristine modern Voice UI off-white
-COLOR_BG = (10, 10, 12)       # Deep slate black
+COLOR_WAVE = (245, 245, 248)  # Pristine Voice UI white
+COLOR_BG = (10, 10, 12)       # Dark background
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Ultra-Smooth Voice UI Fluid Aura")
+pygame.display.set_caption("Smooth Voice UI - Organic Idle Waves")
 clock = pygame.time.Clock()
 
 time_counter = 0.0
 
-# Dynamic target variables (where the audio wants to go)
+# Dynamic target variables (simulating talking audio)
 target_v = target_b = target_m = target_t = 0.0
-# Smoothed running variables (where the visualizer currently is)
+# Smoothed running variables (interpolation state)
 v = b = m = t = 0.0
 
 running = True
@@ -26,62 +26,68 @@ while running:
     clock.tick(60)
     screen.fill(COLOR_BG)
     
-    # AUDIO EMULATION: Randomly update targets to mimic a natural speech cadence
-    if random.random() < 0.05:
-        target_v = random.uniform(0.3, 1.4)  # Volume
-        target_b = random.uniform(0.2, 1.8)  # Bass (Low pitches)
-        target_m = random.uniform(0.2, 1.8)  # Mids (Vocals)
-        target_t = random.uniform(0.1, 1.2)  # Treble (High pitches)
+    # --- SIMULATE SPEECH INTERMITTENTLY ---
+    # Cycle between 3 seconds of active talking and 3 seconds of perfect idle
+    current_ticks = pygame.time.get_ticks()
+    if (current_ticks // 3000) % 2 == 0:
+        if random.random() < 0.05:
+            target_v = random.uniform(0.3, 1.4)
+            target_b = random.uniform(0.2, 1.8)
+            target_m = random.uniform(0.2, 1.8)
+            target_t = random.uniform(0.1, 1.2)
     else:
-        # Decay targets gradually back down toward zero when silence approaches
-        target_v *= 0.94
-        target_b *= 0.94
-        target_m *= 0.94
-        target_t *= 0.94
+        # Go completely silent to show off the refined idle state
+        target_v = target_b = target_m = target_t = 0.0
 
-    # TEMPORAL SMOOTHING: Linear interpolation (lerp) glides variables over time
-    smoothing_factor = 0.12  # Lower is smoother/slower, higher is more snappy
+    # TEMPORAL SMOOTHING: Glides variables smoothly
+    smoothing_factor = 0.12
     v += (target_v - v) * smoothing_factor
     b += (target_b - b) * smoothing_factor
     m += (target_m - m) * smoothing_factor
     t += (target_t - t) * smoothing_factor
 
-    # Adjust organic time flow step depending on speaking volume velocity
-    time_counter += 0.035 + (v * 0.04)
+    # Advance time (flows calmly at baseline, speeds up slightly when loud)
+    time_counter += 0.03 + (v * 0.04)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
     center_x, center_y = WIDTH // 2, HEIGHT // 2
-    num_points = 240  # Massive point density to naturally eliminate jagged steps
+    num_points = 240  # Ultra-high density loop
     
-    # First pass: compute rough raw radii values around the circular perimeter
     raw_radii = []
     for i in range(num_points):
         angle = (i / num_points) * math.pi * 2
         
-        # Idle ambient dynamic fluid ripple (keeps it alive during breathing states)
-        ripple = math.sin(angle * 3 + time_counter) * 6.0
+        # 1. ORGANIC IDLE WAVE ANIMATION:
+        # Blends two different frequencies so the bumps naturally have varying heights
+        # Base tight ripples (amplitude 3.0) + Slow broad shifts (amplitude 1.5)
+        # Keeps maximum idle movement constrained under 4.5 pixels to stay circular
+        wave_1 = math.sin(angle * 6 + time_counter * 1.5) * 3.0
+        wave_2 = math.cos(angle * 3 - time_counter * 0.8) * 1.5
+        idle_ripple = wave_1 + wave_2
         
-        # Fluid harmonic wave calculations assigned to frequency vectors
+        # 2. TALKING MORPHS (only active when sound variables > 0)
         bass_influence = math.sin(angle * 2 - time_counter * 1.2) * (b * 24)
         mids_influence = math.cos(angle * 4 + time_counter * 1.5) * (m * 16)
         treble_influence = math.sin(angle * 7 + time_counter * 2.2) * (t * 10)
+        global_expansion = v * 30
         
-        r = BASE_RADIUS + ripple + (v * 30) + bass_influence + mids_influence + treble_influence
+        # Combine parameters to get total shape radius
+        r = BASE_RADIUS + idle_ripple + global_expansion + bass_influence + mids_influence + treble_influence
         raw_radii.append(r)
 
-    # SPATIAL SMOOTHING: Apply moving rolling window average to remove sharp points
+    # SPATIAL SMOOTHING: Smooths out sharp edge transitions
     smoothed_radii = []
-    window_size = 7  # Increased window size to provide pure hardware-free curves
+    window_size = 7
     for i in range(num_points):
         total = 0
         for w in range(-window_size // 2, window_size // 2 + 1):
             total += raw_radii[(i + w) % num_points]
         smoothed_radii.append(total / window_size)
 
-    # Map smoothed circular radii values back out to absolute coordinate points
+    # Convert to standard coordinate points
     points = []
     for i in range(num_points):
         angle = (i / num_points) * math.pi * 2
@@ -89,12 +95,9 @@ while running:
         y = center_y + math.sin(angle) * smoothed_radii[i]
         points.append((x, y))
 
-    # SAFE RENDERING ENGINE: Standard polygon call with dense vector math overlay
+    # Safe render fallback block
     if len(points) > 2:
-        # Fill standard inner polygon structures
         pygame.draw.polygon(screen, COLOR_WAVE, points)
-        
-        # Draw a tight matching vector shell on top to clean up trailing subpixels perfectly
         pygame.draw.lines(screen, COLOR_WAVE, True, points, width=2)
     
     pygame.display.flip()
